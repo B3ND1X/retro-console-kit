@@ -21,3 +21,5 @@ python3 -m unittest discover -s tests -v
 Python cryptography is a workstation test/signing dependency. The Pi verifies through its existing OpenSSL. No private signing key is present in this repository or any release.
 
 Version 1.0.1 is a conservative OTA verification release: its frontend is byte-identical to the working 1.0.0 frontend; payload changes are version metadata and redistribution notices. Personal data and gameplay configuration are untouched.
+
+The live GitHub upgrade passed; see [verification results](docs/VERIFICATION.md).
