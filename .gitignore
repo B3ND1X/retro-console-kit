@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+*.pem
+*.key
+*.private.json
+release-assets*/
+build/
+staging/

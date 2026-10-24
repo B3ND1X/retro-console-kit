@@ -1,0 +1,9 @@
+[Unit]
+Description=Optional signed console release check
+After=network-online.target snes-software-recovery.service
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 -I /usr/local/lib/snes-updater/bootstrap.py auto
+TimeoutStartSec=2min
+UMask=0077
+Nice=15

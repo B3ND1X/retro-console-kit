@@ -1,0 +1,9 @@
+[Unit]
+Description=Authenticated console software update (one shot)
+After=network-online.target snes-software-recovery.service
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 -I /usr/local/lib/snes-updater/bootstrap.py worker
+TimeoutStartSec=20min
+UMask=0077
+Nice=10

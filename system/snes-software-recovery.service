@@ -1,0 +1,10 @@
+[Unit]
+Description=Restore interrupted console application update before frontend startup
+After=local-fs.target
+Before=getty@tty1.service
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 -I /usr/local/lib/snes-updater/bootstrap.py recover
+RemainAfterExit=yes
+[Install]
+WantedBy=multi-user.target

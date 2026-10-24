@@ -1,0 +1,19 @@
+# Authenticated console software updates
+
+Target: RetroPie 4.8, Raspbian 10, armhf, Pi Zero 2 W; 1080p custom frontend. The target ID is `retropie48-raspbian10-armhf-zero2w`. Future OS targets require separate tested releases and local compatibility policy. No apt, firmware, emulator or upstream Git updates run here.
+
+The new `restore.apply_software_update` entry point uses the same durable file transaction and rollback primitives as the existing file recovery installer. OTA never invokes full clone/recover mode because that mode intentionally restores user configuration. Every application destination is fixed in the administrator-owned catalogue. Packages contain IDs rather than paths the release can choose.
+
+Runtime files under `/usr/local/lib/snes-updater`, trust policy under `/etc/snes-updater` and systemd bootstrap are outside OTA payload scope. This first protocol cannot remotely update its own privileged verifier or broaden its allowlist. Such changes require separately reviewed administrator maintenance. An approved theme file can be added individually after licence review; no existing third-party theme pack is implicitly redistributable.
+
+Private/user state is excluded entirely: ROMs, BIOS, progress, mappings, account state, user themes, per-ROM overrides and RetroArch settings are not update destinations. Baseline hashes refuse to overwrite an application file modified locally. Preferences use read-time defaults and fixed built-in migrations; packages cannot supply shell migrations. Unchanged managed files are not rewritten.
+
+HTTPS fetching runs as nobody, writing only to an inherited descriptor opened by the root worker. A signed Ed25519 manifest is authenticated through system OpenSSL before its payload declarations are parsed. Exact size/hash checks precede streaming extraction; only declared regular files are accepted. Symlinks, hard links, traversal, special files, duplicate entries, unexpected destinations and incompatible/repeated/downgraded releases are rejected. The public RFC test key is explicitly rejected outside marked workstation fixtures.
+
+There is no permanent updater process. Fixed sudo actions start one-shot systemd work, while the controller UI polls bounded local status. An optional daily timer checks only, never installs, and is disabled in preferences initially. Updates and game launch share a kernel file lock; process inspection also detects legacy/standalone launch paths. Root-managed application parents must be protected from user writes.
+
+Each replacement is atomic on its destination filesystem. The whole multi-file update is **not** filesystem-atomic. Original files and a fsynced journal precede replacement. `active.json` records interrupted work. A startup service restores any uncommitted transaction before the frontend starts; failed recovery prevents the frontend from starting while leaving SSH available. The old verifier and rollback code remain intact.
+
+After applying, the worker restarts the frontend and requires a fresh process with the installed binary hash, 1080p size and advancing main-loop heartbeat. An ELF header and shared-library preflight precede commit. A durable COMMITTED marker is the commit boundary; recovery finalizes committed metadata instead of rolling it back. A separate durable highest-version record preserves the anti-downgrade floor across a deliberate rollback. A failed readiness check restores originals and restarts the old frontend. A successful update retains one user-visible previous version; older journals remain administrator recovery evidence until reviewed cleanup.
+
+No telemetry, tokens, authenticated GitHub calls or uploads. The release builder never publishes and never generates signing keys. Public releases are retrieved using the [GitHub Releases API](https://docs.github.com/en/rest/releases/releases#list-releases).

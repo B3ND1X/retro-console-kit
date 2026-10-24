@@ -1,0 +1,8 @@
+[Unit]
+Description=Daily optional console update check (never installs)
+[Timer]
+OnBootSec=10min
+OnUnitActiveSec=24h
+RandomizedDelaySec=30min
+[Install]
+WantedBy=timers.target

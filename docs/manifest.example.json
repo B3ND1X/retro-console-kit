@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "protocol": 1,
+  "version": "1.1.0",
+  "repository": "B3ND1X/retro-console-kit",
+  "target": "retropie48-raspbian10-armhf-zero2w",
+  "notes": "Example only. Build real checksums and signatures using developer/release.py.",
+  "archive": {
+    "name": "software-retropie48-raspbian10-armhf-zero2w.tar.gz",
+    "size": 12345,
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "files": [
+    {
+      "path": "app/VERSION",
+      "size": 6,
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "path": "licenses/ConsoleToolkit.txt",
+      "size": 1000,
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ],
+  "migrations": []
+}
