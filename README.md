@@ -23,3 +23,8 @@ Python cryptography is a workstation test/signing dependency. The Pi verifies th
 Version 1.0.1 is a conservative OTA verification release: its frontend is byte-identical to the working 1.0.0 frontend; payload changes are version metadata and redistribution notices. Personal data and gameplay configuration are untouched.
 
 The live GitHub upgrade passed; see [verification results](docs/VERIFICATION.md).
+
+## Current media and casting source
+
+The October 25 source update adds LookMovie movies/TV fixes, YouTube casting, AirPlay coordination, media player code and regression tests under `addons/`. Frontend integration includes are also provided at repository root. See [source sync and validation](docs/SOURCE-SYNC-2026-10-25.md) for coverage and runtime prerequisites. These source changes are newer than the v1.0.1 binary release. A source update to main does not install an OTA upgrade.
+

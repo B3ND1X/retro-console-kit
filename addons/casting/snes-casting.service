@@ -1,0 +1,28 @@
+[Unit]
+Description=SNES optional casting coordinator
+After=network.target sound.target snes-menu-music.service
+Wants=snes-casting.socket
+StartLimitIntervalSec=60
+StartLimitBurst=3
+
+[Service]
+Type=simple
+User=CONSOLE_USER
+SupplementaryGroups=audio video input
+Environment=HOME=CONSOLE_HOME
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/usr/bin/python3 /usr/local/lib/snes-console/casting/daemon.py
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=20
+KillMode=mixed
+SendSIGKILL=no
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=no
+ProtectSystem=full
+MemoryAccounting=yes
+TasksMax=64
+
+[Install]
+WantedBy=multi-user.target

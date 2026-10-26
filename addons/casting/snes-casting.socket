@@ -1,0 +1,13 @@
+[Unit]
+Description=SNES private casting control socket
+
+[Socket]
+ListenStream=/run/snes-casting/control.sock
+SocketUser=CONSOLE_USER
+SocketGroup=CONSOLE_USER
+SocketMode=0600
+DirectoryMode=0755
+RemoveOnStop=yes
+
+[Install]
+WantedBy=sockets.target

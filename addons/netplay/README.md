@@ -1,0 +1,35 @@
+# Controller-friendly Netplay
+
+Highlight a game and hold X, then choose NETPLAY from the existing Game Information & Settings menu. Settings > Netplay edits the player name, direct host address, port (55435 by default), and relay region with the console's on-screen keyboard.
+
+- HOST ONLINE starts a public RetroArch lobby room using the official relay; no router changes are made.
+- JOIN ONLINE ROOM lists open, password-free rooms with the same game CRC and exact installed core name/version. It does not automatically join anyone. A room selection expires after two minutes.
+- HOST ON LOCAL NETWORK starts a direct, unadvertised session. A friend on the same network uses JOIN BY ADDRESS. Internet direct hosting requires the host's existing router port forwarding.
+- JOIN BY ADDRESS accepts an IPv4 address/hostname and optional :port, or raw IPv6 at the configured port. Edit HOST ADDRESS to change it.
+- Normal launches remain offline. The one-launch request expires after five minutes and is discarded if a different game/core is launched. Cancelling the BIOS check clears it.
+- RetroArch's regular exit controls and physical RESET remain unchanged. Netplay has no extra idle service.
+
+The menu supports selected installed FCEUmm, Nestopia, SNES9x, Genesis Plus GX, PicoDrive, FBNeo/FBA2012, Gambatte, Stella2014 and PCE Fast Libretro commands. A supported core still needs a compatible game and peer. Standalone emulators, MAME cores, and FBNeo subsystem commands are excluded. Handheld support does not emulate link cables. Multi-file arcade ZIPs use direct joining because their game CRC cannot be safely inferred from one archive entry.
+
+Use identical game data and matching core/RetroArch versions where possible. The installed Pi is RetroArch 1.10.0. Newer desktop cores can have incompatible state layouts even when the core name matches. The matching-room filter intentionally excludes a different core version; direct joining leaves the final compatibility handshake to RetroArch. Existing cores are never upgraded or compiled by this feature.
+
+Offline shaders, overlays, display modes, emulator defaults, controller mappings and saves remain in place. Only the transient Runcommand append configuration receives Netplay options, including disabling automatic save-state load/save and configuration writes for that session. Netplay uses the existing game's battery-save behavior; it does not create cloud backups or transfer ROMs through the lobby. Runcommand hooks for music, bezels, achievements and controllers are preserved.
+
+Implementation: /usr/local/lib/snes-console/netplay.py; additive marked launch block in /opt/retropie/supplementary/runcommand/runcommand.sh; maintained GuiConsoleSystemSettings.cpp, GuiConsoleExperience.cpp and GuiConsoleNetplay.inc; user preferences ~/.config/snes-netplay/settings.json (private permissions). pending.json and rooms.json are temporary session records and should not be cloned.
+
+Verified: twelve backend tests; native frontend controller navigation and keyboard save; real FCEUmm host/client synchronization as players 1 and 2 on the Pi with private Super Mario Bros (E) ROM/save/config copies, clean exit codes 0, and production configuration hashes unchanged. Test host peak RSS 46 MB, headless client 25 MB. These memory measurements are not an internet latency benchmark. Refer to saved game-report/ui-report and additional relay/desktop reports for their actual results. No claim of testing every supported core or game.
+
+Rollback on the Pi: sudo python3 /home/snes/console-maintenance/netplay/rollback.py
+The journal and previous files live in the same directory's deployment.json and backup/. Later-modified files are skipped to avoid overwriting newer work. Settings can be retained; they have no effect after rollback. The recovery kit's normal install journal and --undo restore the pre-install files as usual.
+
+Pi memory safety: installed SNES9x 2010 hosting exhausted RAM during testing because RetroArch 1.10 reserves 124 serialized rollback states. SNES Netplay therefore uses the already installed SNES9x 2005 core for that session via a final -L argument; the offline default and existing core-specific save states are never changed. Clients need the corresponding 2005 core. No additional swap or overclock is enabled for Netplay.
+
+Additional tests: the safe SNES session profile synchronized Super Mario All-Stars + Super Mario World between two matching SNES9x 2005 peers; host peak RSS 114 MiB and headless client 66 MiB, clean exits, protected hashes unchanged. Current desktop FCEUmm and SNES9x 2005 binaries rejected the old Pi cores state layouts: real cross-device match not validated with those versions. Matching precompiled peers are required. No source builds were performed. Online room announcements in RetroArch 1.10 occur every 1,200 frames, so a newly hosted game may need about 20–30 seconds to appear.
+
+Official relay verification passed: the real host published a public room; the matching-room query found it; a second matching FCEUmm peer joined through the official US relay as player 2, with about 118 ms reported ping. Both processes exited 0; host peak RSS about 46 MiB and client 26 MiB. This tests actual external relay traffic from two peers on one Pi, not two geographically separated users.
+
+End-to-end verification passed: synthetic controller input held X, selected Netplay and direct hosting, launched through the real Runcommand with --host, returned to the same game list, then launched the same game normally with no Netplay arguments. Protected frontend/controller/emulator configurations remained unchanged. The frontend and marked launcher block are persistent, with no manual service startup.
+
+Compatibility messages: direct joining now reads the host core name, exact version/build and game CRC before arming a launch. A core mismatch opens a controller-readable popup showing Host requires and This console uses, and leaves the game unlaunched. Unreachable/password/platform/protocol checks are reported as unverified, never fabricated as a core mismatch. The check stops before sending INFO, SYNC, player input or game state. Lobby browsing includes incompatible rooms for the same game as CORE MISMATCH entries; selecting one shows both versions without joining. Hosting confirmations also name this console's required core/version. A successful preflight does not guarantee cross-platform state compatibility; RetroArch still performs its final checks.
+
+Compatibility validation: six mismatch/matching/error tests and three packet-level tests passed, plus the original twelve backend tests. The real desktop host reported FCEUmm (SVN) ac0d00a and the Pi displayed its own f27adb5 version correctly. The native controller popup test confirmed the exact host requirement, no game launch, and normal Back navigation. An interoperability issue with the older host's uncompressed handshake path was corrected by negotiating its normal zlib support; a real matching 1.10 host/client then passed the preliminary check, synchronized as players 1 and 2, and exited cleanly.

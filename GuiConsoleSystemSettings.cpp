@@ -14,6 +14,12 @@
 #include "VolumeControl.h"
 #include "Settings.h"
 #include "Window.h"
+#include "AudioManager.h"
+#include "platform.h"
+#include <fcntl.h>
+#include <SDL_events.h>
+#include <SDL_timer.h>
+#include <sys/file.h>
 #include "Log.h"
 #include "InputManager.h"
 #include "guis/GuiInputConfig.h"
@@ -37,7 +43,7 @@ namespace {
 using Result=std::pair<bool,std::string>;
 Result command(std::vector<std::string> args,const std::string& secret="") {
  int out[2],in[2];if(pipe(out)||socketpair(AF_UNIX,SOCK_STREAM,0,in))return {false,"ERROR\tCould not open settings helper"};
- std::vector<std::string> cmd={"/usr/bin/sudo","-n","/usr/local/sbin/snes-console-settings"};if(!args.empty()&&args[0]=="bezel-toggle"){cmd={"/usr/bin/python3","/opt/retropie/configs/all/retroarch/overlay/batocera/bezel.py","toggle"};args.clear();}if(!args.empty()&&args[0]=="progress"){cmd={"/usr/bin/python3","/usr/local/lib/snes-console/progress.py"};args.erase(args.begin());}if(!args.empty()&&args[0]=="music"){cmd={"/usr/bin/python3","/usr/local/lib/snes-console/music_control.py"};args.erase(args.begin());}if(!args.empty()&&args[0]=="controllers"){cmd={"/usr/bin/python3","/usr/local/lib/snes-console/controllers.py"};args.erase(args.begin());}if(!args.empty()&&args[0]=="netplay"){cmd={"/usr/bin/python3","/usr/local/lib/snes-console/netplay.py"};args.erase(args.begin());}if(!args.empty()&&args[0]=="software-update"){cmd={"/usr/bin/sudo","-n","/usr/local/sbin/snes-software-update"};args.erase(args.begin());}cmd.insert(cmd.end(),args.begin(),args.end());std::vector<char*> argv;for(auto& s:cmd)argv.push_back(const_cast<char*>(s.c_str()));argv.push_back(nullptr);
+ std::vector<std::string> cmd={"/usr/bin/sudo","-n","/usr/local/sbin/snes-console-settings"};if(!args.empty()&&args[0]=="bezel-toggle"){cmd={"/usr/bin/python3","/opt/retropie/configs/all/retroarch/overlay/batocera/bezel.py","toggle"};args.clear();}if(!args.empty()&&args[0]=="progress"){cmd={"/usr/bin/python3","/usr/local/lib/snes-console/progress.py"};args.erase(args.begin());}if(!args.empty()&&args[0]=="music"){cmd={"/usr/bin/python3","/usr/local/lib/snes-console/music_control.py"};args.erase(args.begin());}if(!args.empty()&&args[0]=="controllers"){cmd={"/usr/bin/python3","/usr/local/lib/snes-console/controllers.py"};args.erase(args.begin());}if(!args.empty()&&args[0]=="netplay"){cmd={"/usr/bin/python3","/usr/local/lib/snes-console/netplay.py"};args.erase(args.begin());}if(!args.empty()&&args[0]=="software-update"){cmd={"/usr/bin/sudo","-n","/usr/local/sbin/snes-software-update"};args.erase(args.begin());}if(!args.empty()&&args[0]=="media"){cmd={"/usr/bin/python3","/usr/local/lib/snes-console/media.py"};args.erase(args.begin());}if(!args.empty()&&args[0]=="casting"){cmd={"/usr/bin/python3","/usr/local/lib/snes-console/casting/control.py"};args.erase(args.begin());}cmd.insert(cmd.end(),args.begin(),args.end());std::vector<char*> argv;for(auto& s:cmd)argv.push_back(const_cast<char*>(s.c_str()));argv.push_back(nullptr);
  pid_t pid=fork();
  if(pid==0){close(out[0]);close(in[1]);dup2(in[0],STDIN_FILENO);dup2(out[1],STDOUT_FILENO);dup2(out[1],STDERR_FILENO);close(in[0]);close(out[1]);execv(argv[0],argv.data());_exit(127);}
  close(in[0]);close(out[1]);if(pid<0){close(out[0]);close(in[1]);return {false,"ERROR\tCould not start settings helper"};}
@@ -238,6 +244,9 @@ public:
 
 #include "GuiConsoleSoftwareUpdates.inc"
 
+#include "GuiConsoleMedia.inc"
+#include "GuiConsoleCasting.inc"
+
 class ConsoleSettings:public GuiComponent {
  std::unique_ptr<MenuComponent> menu;std::future<Result> task;std::future<Result> musicStatusTask;bool musicStatusPending=false;int musicStatusTime=0;std::shared_ptr<TextComponent> musicStatusText,musicTitleText;std::shared_ptr<MusicSlider> musicVolumeSlider;std::string musicPlayback,musicTitle,musicActiveSource="local";std::string musicSource="local";std::string page="root",pending,secret,payload,version,saveSystem="all";bool saveStates=false;bool loading=false,change=false,refresh=false;int remembered=0;
  void reset(const std::string& title){if(menu)removeChild(menu.get());menu.reset(new MenuComponent(mWindow,title.c_str()));addChild(menu.get());}
@@ -257,6 +266,7 @@ class ConsoleSettings:public GuiComponent {
   row("NETWORK & WI-FI","",[this]{request("network");});
   row("CONTROLLER MANAGER","",[this]{mWindow->pushGui(new ConsoleControllers(mWindow));});
   row("AUDIO","",[this]{request("audio");});
+  row("CASTING & AIRPLAY","",[this]{mWindow->pushGui(new ConsoleCasting(mWindow));});
   row("MUSIC","",[this]{request("music");});
   row("NETPLAY","",[this]{mWindow->pushGui(new ConsoleNetplay(mWindow));});
   row("RETROACHIEVEMENTS","",[this]{openConsoleAchievements(mWindow);});
@@ -406,12 +416,28 @@ void openConsoleControllerManager(Window*w){w->pushGui(new ConsoleControllers(w)
 void openConsoleControllerBluetooth(Window*w){w->pushGui(new ConsoleSettings(w,true));}
 void openConsoleMusicPlayer(Window* w){w->pushGui(new ConsoleMusicPlayer(w));}
 void openConsoleSystemSettings(Window* w){w->pushGui(new ConsoleSettings(w));}
-bool consoleSystemSettingsTestState(Window* w,const char* expected){if(std::string(expected).find("NETPLAY_")==0){auto n=dynamic_cast<ConsoleNetplay*>(w->peekGui());return n&&n->ready()&&std::string(expected)=="NETPLAY_"+n->current();}auto manager=dynamic_cast<ConsoleControllers*>(w->peekGui());if(std::string(expected)=="SOFTWARE_UPDATES"){auto u=dynamic_cast<ConsoleSoftwareUpdates*>(w->peekGui());return u&&u->ready();}std::string controllerExpected=expected;if(controllerExpected.find("CONTROLLERS_")==0)return manager&&manager->ready()&&controllerExpected=="CONTROLLERS_"+manager->current();if(controllerExpected=="MAIN_DEVELOPER")return dynamic_cast<GuiSettings*>(w->peekGui());if(controllerExpected=="CONTROLLER_TEST")return dynamic_cast<ConsoleControllerTest*>(w->peekGui());if(controllerExpected=="CONTROLLER_WIZARD")return dynamic_cast<ConsoleSafeControllerWizard*>(w->peekGui());if(controllerExpected=="CONTROLLER_TRIAL")return dynamic_cast<ConsoleControllerTrial*>(w->peekGui());if(controllerExpected=="CONTROLLER_RECOVERY")return dynamic_cast<ConsoleControllerRecovery*>(w->peekGui());auto s=dynamic_cast<ConsoleSettings*>(w->peekGui());std::string name=expected;if(name=="SONG_BANNER_VISIBLE")return songBanner&&songBanner->visible();if(name=="SONG_BANNER_HIDDEN"||name=="SONG_BANNER_FADED"||name=="SONG_BANNER_DISABLED")return !songBanner||!songBanner->visible();if(name=="SONG_BANNER_ART")return songBanner&&songBanner->visible()&&songBanner->hasArtwork();if(name=="SONG_TITLES_OFF")return Settings::getInstance()->getBool("MusicSongTitlesDisabled");if(name=="SONG_TITLES_ON")return !Settings::getInstance()->getBool("MusicSongTitlesDisabled");if(name.find("MUSIC_PLAYER")==0){auto p=dynamic_cast<ConsoleMusicPlayer*>(w->peekGui());if(!p||!p->ready())return false;if(name=="MUSIC_PLAYER_PAUSED")return p->value("PLAYBACK")=="Paused";if(name=="MUSIC_PLAYER_PLAYING")return p->value("PLAYBACK")=="Playing";if(name=="MUSIC_PLAYER_REPEAT_ONE")return p->value("REPEAT")=="one";return true;}if(name=="BROWSE_NOT_NES"){auto v=ViewController::get();return w->peekGui()==v&&v->getState().viewing==ViewController::GAME_LIST&&v->getState().getSystem()->getName()!="nes";}if(name=="HUD_ON"||name=="HUD_OFF")return Settings::getInstance()->getBool("ConsoleDeviceStats")==(name=="HUD_ON");if(name=="SYSTEM_POWER")return dynamic_cast<GuiSettings*>(w->peekGui());if(name=="SYSTEM_KEYBOARD")return dynamic_cast<ConsoleSettingsKeyboard*>(w->peekGui());if(name=="MUSIC_DETAILS")return dynamic_cast<GuiMsgBox*>(w->peekGui());if(name=="MUSIC_VOLUME_FOCUSED")return s&&s->ready()&&s->volumeFocused();if(name=="MUSIC_VOLUME_45")return s&&s->ready()&&s->musicVolume()==45;if(name=="MUSIC_SPOTIFY"||name=="MUSIC_LOCAL")return s&&s->ready()&&s->source()==(name=="MUSIC_SPOTIFY"?"spotify":"local");return s&&s->ready()&&name=="SYSTEM_"+s->current();}
+bool consoleSystemSettingsTestState(Window* w,const char* expected){if(std::string(expected)=="CASTING"){auto c=dynamic_cast<ConsoleCasting*>(w->peekGui());return c&&c->ready();}if(std::string(expected).find("NETPLAY_")==0){auto n=dynamic_cast<ConsoleNetplay*>(w->peekGui());return n&&n->ready()&&std::string(expected)=="NETPLAY_"+n->current();}auto manager=dynamic_cast<ConsoleControllers*>(w->peekGui());if(std::string(expected).find("VIDEO_")==0){auto v=dynamic_cast<ConsoleMedia*>(w->peekGui());return v&&v->ready()&&(std::string(expected)=="VIDEO_posters"?v->hasPosters():std::string(expected)=="VIDEO_"+v->current());}if(std::string(expected)=="SOFTWARE_UPDATES"){auto u=dynamic_cast<ConsoleSoftwareUpdates*>(w->peekGui());return u&&u->ready();}std::string controllerExpected=expected;if(controllerExpected.find("CONTROLLERS_")==0)return manager&&manager->ready()&&controllerExpected=="CONTROLLERS_"+manager->current();if(controllerExpected=="MAIN_DEVELOPER")return dynamic_cast<GuiSettings*>(w->peekGui());if(controllerExpected=="CONTROLLER_TEST")return dynamic_cast<ConsoleControllerTest*>(w->peekGui());if(controllerExpected=="CONTROLLER_WIZARD")return dynamic_cast<ConsoleSafeControllerWizard*>(w->peekGui());if(controllerExpected=="CONTROLLER_TRIAL")return dynamic_cast<ConsoleControllerTrial*>(w->peekGui());if(controllerExpected=="CONTROLLER_RECOVERY")return dynamic_cast<ConsoleControllerRecovery*>(w->peekGui());auto s=dynamic_cast<ConsoleSettings*>(w->peekGui());std::string name=expected;if(name=="SONG_BANNER_VISIBLE")return songBanner&&songBanner->visible();if(name=="SONG_BANNER_HIDDEN"||name=="SONG_BANNER_FADED"||name=="SONG_BANNER_DISABLED")return !songBanner||!songBanner->visible();if(name=="SONG_BANNER_ART")return songBanner&&songBanner->visible()&&songBanner->hasArtwork();if(name=="SONG_TITLES_OFF")return Settings::getInstance()->getBool("MusicSongTitlesDisabled");if(name=="SONG_TITLES_ON")return !Settings::getInstance()->getBool("MusicSongTitlesDisabled");if(name.find("MUSIC_PLAYER")==0){auto p=dynamic_cast<ConsoleMusicPlayer*>(w->peekGui());if(!p||!p->ready())return false;if(name=="MUSIC_PLAYER_PAUSED")return p->value("PLAYBACK")=="Paused";if(name=="MUSIC_PLAYER_PLAYING")return p->value("PLAYBACK")=="Playing";if(name=="MUSIC_PLAYER_REPEAT_ONE")return p->value("REPEAT")=="one";return true;}if(name=="BROWSE_NOT_NES"){auto v=ViewController::get();return w->peekGui()==v&&v->getState().viewing==ViewController::GAME_LIST&&v->getState().getSystem()->getName()!="nes";}if(name=="HUD_ON"||name=="HUD_OFF")return Settings::getInstance()->getBool("ConsoleDeviceStats")==(name=="HUD_ON");if(name=="SYSTEM_POWER")return dynamic_cast<GuiSettings*>(w->peekGui());if(name=="SYSTEM_KEYBOARD")return dynamic_cast<ConsoleSettingsKeyboard*>(w->peekGui());if(name=="MUSIC_DETAILS")return dynamic_cast<GuiMsgBox*>(w->peekGui());if(name=="MUSIC_VOLUME_FOCUSED")return s&&s->ready()&&s->volumeFocused();if(name=="MUSIC_VOLUME_45")return s&&s->ready()&&s->musicVolume()==45;if(name=="MUSIC_SPOTIFY"||name=="MUSIC_LOCAL")return s&&s->ready()&&s->source()==(name=="MUSIC_SPOTIFY"?"spotify":"local");return s&&s->ready()&&name=="SYSTEM_"+s->current();}
 
 void updateConsoleSongBanner(Window* w,int dt){
  static unsigned long frames=0;static int heartbeat=0;frames++;heartbeat+=dt;if(heartbeat>=5000){heartbeat=0;const char* temporary="/run/snes-updater-ui/frontend-ready.tmp";std::ofstream f(temporary);if(f){f<<"{\"pid\":"<<getpid()<<",\"frames\":"<<frames<<",\"width\":"<<Renderer::getScreenWidth()<<",\"height\":"<<Renderer::getScreenHeight()<<"}\n";f.close();std::rename(temporary,"/run/snes-updater-ui/frontend-ready.json");}}
-controllerRecoveryTick(w,dt);if(!songBanner)songBanner.reset(new ConsoleSongBanner(w));songBanner->update(dt);}
+consoleCastingTick(w,dt);controllerRecoveryTick(w,dt);if(!songBanner)songBanner.reset(new ConsoleSongBanner(w));songBanner->update(dt);}
 void renderConsoleSongBanner(Window* w){if(songBanner&&!w->isSleeping()&&!dynamic_cast<ConsoleMusicPlayer*>(w->peekGui()))songBanner->render(Transform4x4f::Identity());}
 void resetConsoleSongBanner(){songBanner.reset();}
 
 void openConsoleNetplay(Window*w,FileData*g){w->pushGui(new ConsoleNetplay(w,g));}
+
+int runConsoleMediaOnly(){
+ consoleMediaStandalone=true;setenv("SNES_MEDIA_ONLY","1",1);
+ int fd=-1;const char* inherited=getenv("SNES_MEDIA_LOCK_FD");
+ if(inherited){int n=atoi(inherited);struct stat a,b;if(n>2&&fstat(n,&a)==0&&stat("/run/snes-updater/game.lock",&b)==0&&a.st_dev==b.st_dev&&a.st_ino==b.st_ino)fd=dup(n);}
+ if(fd<0)fd=open("/run/snes-updater/game.lock",O_RDONLY|O_CLOEXEC);
+ if(fd>=0&&flock(fd,LOCK_EX|LOCK_NB)!=0){close(fd);return 1;}
+ Settings::getInstance()->setBool("ConsoleDeviceStats",false);Settings::getInstance()->setInt("ScreenSaverTime",0);Settings::getInstance()->setInt("MaxVRAM",32);
+ Window window;if(!window.init()){if(fd>=0)close(fd);return 1;}window.pushGui(new ConsoleMedia(&window));
+ LOG(LogInfo)<<"LookMovie media-only mode: no game library loaded";int last=SDL_GetTicks();bool running=true;
+ while(running&&window.peekGui()){
+  SDL_Event event;while(SDL_PollEvent(&event)){if(event.type==SDL_QUIT)running=false;else InputManager::getInstance()->parseEvent(event,&window);}
+  if(!running||!window.peekGui())break;int now=SDL_GetTicks(),dt=std::max(0,now-last);last=now;window.update(std::min(dt,100));consoleExperienceTestTick(&window,std::min(dt,100));if(!window.peekGui())break;window.render();Renderer::swapBuffers();SDL_Delay(1);Log::flush();
+ }
+ while(window.peekGui())delete window.peekGui();window.deinit();if(fd>=0)close(fd);return 0;
+}

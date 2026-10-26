@@ -1,0 +1,102 @@
+diff --git a/rpiplay.cpp b/rpiplay.cpp
+index 528e4cf..2a33821 100755
+--- a/rpiplay.cpp
++++ b/rpiplay.cpp
+@@ -24,6 +24,13 @@
+ #include <string>
+ #include <vector>
+ #include <fstream>
++#include <atomic>
++#include <cstdio>
++static std::atomic<int> cast_connections(0);
++static std::atomic<bool> casting_stream(false);
++static bool cast_stream_started();
++#include <mutex>
++#include <poll.h>
+ 
+ #include <sys/socket.h>
+ #include <ifaddrs.h>
+@@ -80,6 +87,32 @@ static audio_init_func_t audio_init_func = NULL;
+ static video_renderer_t *video_renderer = NULL;
+ static audio_renderer_t *audio_renderer = NULL;
+ static logger_t *render_logger = NULL;
++static bool coordinated = getenv("SNES_AIRPLAY_COORDINATED") != NULL;
++static std::mutex renderer_mutex;
++static video_renderer_config_t saved_video_config;
++static audio_renderer_config_t saved_audio_config;
++static int start_renderers() {
++    if ((video_renderer = video_init_func(render_logger, &saved_video_config)) == NULL) return -1;
++    if (saved_audio_config.device != AUDIO_DEVICE_NONE &&
++        (audio_renderer = audio_init_func(render_logger, video_renderer, &saved_audio_config)) == NULL) return -1;
++    if (video_renderer) video_renderer->funcs->start(video_renderer);
++    if (audio_renderer) audio_renderer->funcs->start(audio_renderer);
++    return 0;
++}
++static bool cast_stream_started() {
++    std::lock_guard<std::mutex> guard(renderer_mutex);
++    if (casting_stream) return video_renderer != NULL;
++    if (coordinated) {
++        puts("SNES_AIRPLAY_REQUEST"); fflush(stdout);
++        struct pollfd input = {STDIN_FILENO, POLLIN, 0}; char decision = '0';
++        if (poll(&input, 1, 15000) <= 0 || read(STDIN_FILENO, &decision, 1) != 1 || decision != '1') {
++            running = false; return false;
++        }
++        if (start_renderers() != 0) { running = false; return false; }
++    }
++    casting_stream = true; puts("SNES_AIRPLAY_CONNECTED"); fflush(stdout); return true;
++}
++
+ 
+ static const video_renderer_list_entry_t video_renderers[] = {
+ #if defined(HAS_RPI_RENDERER)
+@@ -316,20 +349,25 @@ int main(int argc, char *argv[]) {
+ 
+ // Server callbacks
+ extern "C" void conn_init(void *cls) {
++    ++cast_connections;
+     if (video_renderer) video_renderer->funcs->update_background(video_renderer, 1);
+ }
+ 
+ extern "C" void conn_destroy(void *cls) {
++    if(--cast_connections==0 && casting_stream.exchange(false)){puts("SNES_AIRPLAY_DISCONNECTED");fflush(stdout);if(coordinated)running=false;}
+     if (video_renderer) video_renderer->funcs->update_background(video_renderer, -1);
+ }
+ 
+ extern "C" void audio_process(void *cls, raop_ntp_t *ntp, aac_decode_struct *data) {
++    if (coordinated && !casting_stream) return;
++    if (!cast_stream_started()) return;
+     if (audio_renderer != NULL) {
+         audio_renderer->funcs->render_buffer(audio_renderer, ntp, data->data, data->data_len, data->pts);
+     }
+ }
+ 
+ extern "C" void video_process(void *cls, raop_ntp_t *ntp, h264_decode_struct *data) {
++    if (!cast_stream_started()) return;
+     if (video_renderer != NULL) {
+         video_renderer->funcs->render_buffer(video_renderer, ntp, data->data, data->data_len, data->pts, data->frame_type);
+     }
+@@ -400,21 +438,9 @@ int start_server(std::vector<char> hw_addr, std::string name, bool debug_log,
+ 
+     if (video_config->low_latency) logger_log(render_logger, LOGGER_INFO, "Using low-latency mode");
+ 
+-    if ((video_renderer = video_init_func(render_logger, video_config)) == NULL) {
+-        LOGE("Could not init video renderer");
+-        return -1;
+-    }
+-
+-    if (audio_config->device == AUDIO_DEVICE_NONE) {
+-        LOGI("Audio disabled");
+-    } else if ((audio_renderer = audio_init_func(render_logger, video_renderer, audio_config)) ==
+-               NULL) {
+-        LOGE("Could not init audio renderer");
+-        return -1;
+-    }
+-
+-    if (video_renderer) video_renderer->funcs->start(video_renderer);
+-    if (audio_renderer) audio_renderer->funcs->start(audio_renderer);
++    saved_video_config = *video_config;
++    saved_audio_config = *audio_config;
++    if (!coordinated && start_renderers() != 0) return -1;
+ 
+     unsigned short port = 0;
+     raop_start(raop, &port);
