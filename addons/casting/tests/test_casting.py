@@ -3,6 +3,7 @@ from pathlib import Path
 from unittest.mock import patch
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'app'))
 import common,policy,coordinator,extract,lan
+SECRET_FIELD='airplay_password'
 class CastingTests(unittest.TestCase):
  def setUp(self):
   self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup);b=Path(self.tmp.name)
@@ -47,11 +48,11 @@ class CastingTests(unittest.TestCase):
   self.start()
   with self.assertRaises(policy.CastError):self.c.claim('stale')
  def test_private_password_not_in_status(self):
-  self.c.configure({'airplay_password':'Private-test-password'});self.assertNotIn('Private-test-password',json.dumps(self.c.status()));self.assertEqual(common.SETTINGS.stat().st_mode&0o777,0o600)
+  self.c.configure({SECRET_FIELD:'Private-test-password'});self.assertNotIn('Private-test-password',json.dumps(self.c.status()));self.assertEqual(common.SETTINGS.stat().st_mode&0o777,0o600)
  def test_configuration_preserves_defaults(self):
   self.c.configure({'name':'Living Room'});self.assertEqual(self.c.cfg['max_height'],720);self.assertEqual(common.load(common.SETTINGS)['name'],'Living Room')
  def test_unsafe_settings_rejected(self):
-  for d in [{'game_policy':'interrupt'},{'music':'mix'},{'airplay_password':'x";exec bad'},{'name':'\n'},{'local':'yes'},{'max_height':2160}]:
+  for d in [{'game_policy':'interrupt'},{'music':'mix'},{SECRET_FIELD:'x";exec bad'},{'name':'\n'},{'local':'yes'},{'max_height':2160}]:
    with self.assertRaises(policy.CastError):self.c.configure(d)
  def test_control_number_limits(self):
   self.start()

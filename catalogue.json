@@ -1,229 +1,469 @@
 {
-  "schema": 1,
   "files": {
     "app/VERSION": {
-      "destination": "/usr/local/share/snes-console/VERSION",
-      "mode": 420,
       "component": "scripts",
+      "destination": "/usr/local/share/snes-console/VERSION",
       "license": "MIT",
       "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "casting/THIRD_PARTY_LICENSES.txt": {
+      "component": "casting",
+      "destination": "/usr/local/lib/snes-console/casting/THIRD_PARTY_LICENSES.txt",
+      "license": "GPL-3.0-or-later AND LGPL-2.1-or-later AND BSD-3-Clause AND MIT",
+      "license_file": "casting/THIRD_PARTY_LICENSES.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "casting/airplay.py": {
+      "component": "casting",
+      "destination": "/usr/local/lib/snes-console/casting/airplay.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "casting/airplay_event.py": {
+      "component": "casting",
+      "destination": "/usr/local/lib/snes-console/casting/airplay_event.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "casting/common.py": {
+      "component": "casting",
+      "destination": "/usr/local/lib/snes-console/casting/common.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "casting/control.py": {
+      "component": "casting",
+      "destination": "/usr/local/lib/snes-console/casting/control.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "casting/coordinator.py": {
+      "component": "casting",
+      "destination": "/usr/local/lib/snes-console/casting/coordinator.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "casting/daemon.py": {
+      "component": "casting",
+      "destination": "/usr/local/lib/snes-console/casting/daemon.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "casting/extract.py": {
+      "component": "casting",
+      "destination": "/usr/local/lib/snes-console/casting/extract.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "casting/lan.py": {
+      "component": "casting",
+      "destination": "/usr/local/lib/snes-console/casting/lan.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "casting/payload/manifest.json": {
+      "component": "casting",
+      "destination": "/usr/local/lib/snes-console/casting/payload/manifest.json",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "casting/payload/native-runtime.tar.gz": {
+      "component": "casting",
+      "destination": "/usr/local/lib/snes-console/casting/payload/native-runtime.tar.gz",
+      "license": "GPL-3.0-or-later AND LGPL-2.1-or-later AND BSD-3-Clause AND MIT",
+      "license_file": "casting/THIRD_PARTY_LICENSES.txt",
+      "mode": 420,
+      "redistributable": false
+    },
+    "casting/payload/node-runtime.tar.gz": {
+      "component": "casting",
+      "destination": "/usr/local/lib/snes-console/casting/payload/node-runtime.tar.gz",
+      "license": "GPL-3.0-or-later AND LGPL-2.1-or-later AND BSD-3-Clause AND MIT",
+      "license_file": "casting/THIRD_PARTY_LICENSES.txt",
+      "mode": 420,
+      "redistributable": false
+    },
+    "casting/payload/youtube-runtime.tar.gz": {
+      "component": "casting",
+      "destination": "/usr/local/lib/snes-console/casting/payload/youtube-runtime.tar.gz",
+      "license": "GPL-3.0-or-later AND LGPL-2.1-or-later AND BSD-3-Clause AND MIT",
+      "license_file": "casting/THIRD_PARTY_LICENSES.txt",
+      "mode": 420,
+      "redistributable": false
+    },
+    "casting/player.py": {
+      "component": "casting",
+      "destination": "/usr/local/lib/snes-console/casting/player.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "casting/policy.py": {
+      "component": "casting",
+      "destination": "/usr/local/lib/snes-console/casting/policy.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "casting/runtime_store.py": {
+      "component": "casting",
+      "destination": "/usr/local/lib/snes-console/casting/runtime_store.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "casting/vendor/LICENSE.txt": {
+      "component": "casting",
+      "destination": "/usr/local/lib/snes-console/casting/vendor/LICENSE.txt",
+      "license": "MIT",
+      "license_file": "casting/vendor/LICENSE.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "casting/vendor/__init__.py": {
+      "component": "casting",
+      "destination": "/usr/local/lib/snes-console/casting/vendor/__init__.py",
+      "license": "MIT",
+      "license_file": "casting/vendor/LICENSE.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "casting/vendor/cast_discovery.py": {
+      "component": "casting",
+      "destination": "/usr/local/lib/snes-console/casting/vendor/cast_discovery.py",
+      "license": "MIT",
+      "license_file": "casting/vendor/LICENSE.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "casting/vendor/cast_lounge.py": {
+      "component": "casting",
+      "destination": "/usr/local/lib/snes-console/casting/vendor/cast_lounge.py",
+      "license": "MIT",
+      "license_file": "casting/vendor/LICENSE.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "casting/vendor/cast_protocol.py": {
+      "component": "casting",
+      "destination": "/usr/local/lib/snes-console/casting/vendor/cast_protocol.py",
+      "license": "MIT",
+      "license_file": "casting/vendor/LICENSE.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "casting/vendor/cast_receiver.py": {
+      "component": "casting",
+      "destination": "/usr/local/lib/snes-console/casting/vendor/cast_receiver.py",
+      "license": "MIT",
+      "license_file": "casting/vendor/LICENSE.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "casting/vendor/diag.py": {
+      "component": "casting",
+      "destination": "/usr/local/lib/snes-console/casting/vendor/diag.py",
+      "license": "MIT",
+      "license_file": "casting/vendor/LICENSE.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "casting/vendor/fileutil.py": {
+      "component": "casting",
+      "destination": "/usr/local/lib/snes-console/casting/vendor/fileutil.py",
+      "license": "MIT",
+      "license_file": "casting/vendor/LICENSE.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "casting/vendor/httpserve.py": {
+      "component": "casting",
+      "destination": "/usr/local/lib/snes-console/casting/vendor/httpserve.py",
+      "license": "MIT",
+      "license_file": "casting/vendor/LICENSE.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "casting/youtube.py": {
+      "component": "casting",
+      "destination": "/usr/local/lib/snes-console/casting/youtube.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
       "redistributable": true
     },
     "frontend/emulationstation": {
-      "destination": "/opt/retropie/supplementary/emulationstation/emulationstation",
-      "mode": 493,
       "component": "frontend",
+      "destination": "/opt/retropie/supplementary/emulationstation/emulationstation",
       "license": "MIT",
       "license_file": "licenses/EmulationStation.txt",
+      "mode": 493,
       "redistributable": true
     },
     "launcher/runcommand.sh": {
-      "destination": "/opt/retropie/supplementary/runcommand/runcommand.sh",
-      "mode": 493,
       "component": "launcher",
+      "destination": "/opt/retropie/supplementary/runcommand/runcommand.sh",
       "license": "GPL-3.0-or-later",
       "license_file": "licenses/Runcommand.txt",
-      "redistributable": true
-    },
-    "runtime/console_experience.py": {
-      "destination": "/usr/local/lib/snes-console/console_experience.py",
-      "mode": 420,
-      "component": "scripts",
-      "license": "MIT",
-      "license_file": "licenses/ConsoleToolkit.txt",
-      "redistributable": true
-    },
-    "runtime/game_settings.py": {
-      "destination": "/usr/local/lib/snes-console/game_settings.py",
-      "mode": 420,
-      "component": "scripts",
-      "license": "MIT",
-      "license_file": "licenses/ConsoleToolkit.txt",
-      "redistributable": true
-    },
-    "runtime/launch_recovery.py": {
-      "destination": "/usr/local/lib/snes-console/launch_recovery.py",
-      "mode": 420,
-      "component": "scripts",
-      "license": "MIT",
-      "license_file": "licenses/ConsoleToolkit.txt",
-      "redistributable": true
-    },
-    "runtime/controllers.py": {
-      "destination": "/usr/local/lib/snes-console/controllers.py",
-      "mode": 420,
-      "component": "scripts",
-      "license": "MIT",
-      "license_file": "licenses/ConsoleToolkit.txt",
-      "redistributable": true
-    },
-    "runtime/music_control.py": {
-      "destination": "/usr/local/lib/snes-console/music_control.py",
-      "mode": 420,
-      "component": "music",
-      "license": "MIT",
-      "license_file": "licenses/ConsoleToolkit.txt",
-      "redistributable": true
-    },
-    "runtime/music_daemon.py": {
-      "destination": "/usr/local/lib/snes-console/music_daemon.py",
-      "mode": 420,
-      "component": "music",
-      "license": "MIT",
-      "license_file": "licenses/ConsoleToolkit.txt",
-      "redistributable": true
-    },
-    "runtime/spotify_receiver.py": {
-      "destination": "/usr/local/lib/snes-console/spotify_receiver.py",
-      "mode": 420,
-      "component": "music",
-      "license": "MIT",
-      "license_file": "licenses/ConsoleToolkit.txt",
-      "redistributable": true
-    },
-    "runtime/spotify_event.py": {
-      "destination": "/usr/local/lib/snes-console/spotify_event.py",
-      "mode": 420,
-      "component": "music",
-      "license": "MIT",
-      "license_file": "licenses/ConsoleToolkit.txt",
-      "redistributable": true
-    },
-    "runtime/track_art.py": {
-      "destination": "/usr/local/lib/snes-console/track_art.py",
-      "mode": 420,
-      "component": "scripts",
-      "license": "MIT",
-      "license_file": "licenses/ConsoleToolkit.txt",
-      "redistributable": true
-    },
-    "runtime/song_banner.py": {
-      "destination": "/usr/local/lib/snes-console/song_banner.py",
-      "mode": 420,
-      "component": "scripts",
-      "license": "MIT",
-      "license_file": "licenses/ConsoleToolkit.txt",
-      "redistributable": true
-    },
-    "runtime/achievements.py": {
-      "destination": "/usr/local/lib/snes-console/achievements.py",
-      "mode": 420,
-      "component": "scripts",
-      "license": "MIT",
-      "license_file": "licenses/ConsoleToolkit.txt",
-      "redistributable": true
-    },
-    "runtime/bios_check.py": {
-      "destination": "/usr/local/lib/snes-console/bios_check.py",
-      "mode": 420,
-      "component": "scripts",
-      "license": "MIT",
-      "license_file": "licenses/ConsoleToolkit.txt",
-      "redistributable": true
-    },
-    "runtime/n64_launch.py": {
-      "destination": "/usr/local/lib/snes-console/n64_launch.py",
-      "mode": 420,
-      "component": "scripts",
-      "license": "MIT",
-      "license_file": "licenses/ConsoleToolkit.txt",
-      "redistributable": true
-    },
-    "runtime/save_bridge.py": {
-      "destination": "/usr/local/lib/snes-console/save_bridge.py",
-      "mode": 420,
-      "component": "scripts",
-      "license": "MIT",
-      "license_file": "licenses/ConsoleToolkit.txt",
-      "redistributable": true
-    },
-    "runtime/progress.py": {
-      "destination": "/usr/local/lib/snes-console/progress.py",
-      "mode": 420,
-      "component": "scripts",
-      "license": "MIT",
-      "license_file": "licenses/ConsoleToolkit.txt",
-      "redistributable": true
-    },
-    "runtime/reset_recovery.py": {
-      "destination": "/usr/local/lib/snes-console/reset_recovery.py",
-      "mode": 420,
-      "component": "scripts",
-      "license": "MIT",
-      "license_file": "licenses/ConsoleToolkit.txt",
-      "redistributable": true
-    },
-    "runtime/buttons.py": {
-      "destination": "/usr/local/lib/snes-console/buttons.py",
-      "mode": 420,
-      "component": "scripts",
-      "license": "MIT",
-      "license_file": "licenses/ConsoleToolkit.txt",
-      "redistributable": true
-    },
-    "runtime/netplay.py": {
-      "destination": "/usr/local/lib/snes-console/netplay.py",
-      "mode": 420,
-      "component": "scripts",
-      "license": "MIT",
-      "license_file": "licenses/ConsoleToolkit.txt",
-      "redistributable": true
-    },
-    "runtime/music.py": {
-      "destination": "/usr/local/lib/snes-console/music.py",
-      "mode": 420,
-      "component": "scripts",
-      "license": "MIT",
-      "license_file": "licenses/ConsoleToolkit.txt",
-      "redistributable": true
-    },
-    "runtime/sync_ui_mode.py": {
-      "destination": "/usr/local/lib/snes-console/sync_ui_mode.py",
-      "mode": 420,
-      "component": "scripts",
-      "license": "MIT",
-      "license_file": "licenses/ConsoleToolkit.txt",
-      "redistributable": true
-    },
-    "runtime/shutdown_splash.py": {
-      "destination": "/usr/local/lib/snes-console/shutdown_splash.py",
-      "mode": 420,
-      "component": "scripts",
-      "license": "MIT",
-      "license_file": "licenses/ConsoleToolkit.txt",
-      "redistributable": true
-    },
-    "runtime/system_settings.py": {
-      "destination": "/usr/local/sbin/snes-console-settings",
       "mode": 493,
-      "component": "settings",
-      "license": "MIT",
-      "license_file": "licenses/ConsoleToolkit.txt",
       "redistributable": true
     },
     "licenses/ConsoleToolkit.txt": {
-      "destination": "/usr/local/share/snes-console/licenses/ConsoleToolkit.txt",
-      "mode": 420,
       "component": "scripts",
+      "destination": "/usr/local/share/snes-console/licenses/ConsoleToolkit.txt",
       "license": "MIT",
       "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
       "redistributable": true
     },
     "licenses/EmulationStation.txt": {
-      "destination": "/usr/local/share/snes-console/licenses/EmulationStation.txt",
-      "mode": 420,
       "component": "scripts",
+      "destination": "/usr/local/share/snes-console/licenses/EmulationStation.txt",
       "license": "MIT",
       "license_file": "licenses/EmulationStation.txt",
+      "mode": 420,
       "redistributable": true
     },
     "licenses/Runcommand.txt": {
-      "destination": "/usr/local/share/snes-console/licenses/Runcommand.txt",
-      "mode": 420,
       "component": "scripts",
+      "destination": "/usr/local/share/snes-console/licenses/Runcommand.txt",
       "license": "GPL-3.0-or-later",
       "license_file": "licenses/Runcommand.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "runtime/achievements.py": {
+      "component": "scripts",
+      "destination": "/usr/local/lib/snes-console/achievements.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "runtime/bios_check.py": {
+      "component": "scripts",
+      "destination": "/usr/local/lib/snes-console/bios_check.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "runtime/buttons.py": {
+      "component": "scripts",
+      "destination": "/usr/local/lib/snes-console/buttons.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "runtime/console_experience.py": {
+      "component": "scripts",
+      "destination": "/usr/local/lib/snes-console/console_experience.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "runtime/controllers.py": {
+      "component": "scripts",
+      "destination": "/usr/local/lib/snes-console/controllers.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "runtime/game_settings.py": {
+      "component": "scripts",
+      "destination": "/usr/local/lib/snes-console/game_settings.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "runtime/launch_recovery.py": {
+      "component": "scripts",
+      "destination": "/usr/local/lib/snes-console/launch_recovery.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "runtime/media.py": {
+      "component": "media",
+      "destination": "/usr/local/lib/snes-console/media.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "runtime/media_catalog.py": {
+      "component": "media",
+      "destination": "/usr/local/lib/snes-console/media_catalog.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "runtime/media_input.py": {
+      "component": "media",
+      "destination": "/usr/local/lib/snes-console/media_input.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "runtime/media_port.py": {
+      "component": "media",
+      "destination": "/usr/local/lib/snes-console/media_port.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "runtime/music.py": {
+      "component": "scripts",
+      "destination": "/usr/local/lib/snes-console/music.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "runtime/music_control.py": {
+      "component": "music",
+      "destination": "/usr/local/lib/snes-console/music_control.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "runtime/music_daemon.py": {
+      "component": "music",
+      "destination": "/usr/local/lib/snes-console/music_daemon.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "runtime/n64_launch.py": {
+      "component": "scripts",
+      "destination": "/usr/local/lib/snes-console/n64_launch.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "runtime/netplay.py": {
+      "component": "scripts",
+      "destination": "/usr/local/lib/snes-console/netplay.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "runtime/progress.py": {
+      "component": "scripts",
+      "destination": "/usr/local/lib/snes-console/progress.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "runtime/reset_recovery.py": {
+      "component": "scripts",
+      "destination": "/usr/local/lib/snes-console/reset_recovery.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "runtime/save_bridge.py": {
+      "component": "scripts",
+      "destination": "/usr/local/lib/snes-console/save_bridge.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "runtime/shutdown_splash.py": {
+      "component": "scripts",
+      "destination": "/usr/local/lib/snes-console/shutdown_splash.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "runtime/song_banner.py": {
+      "component": "scripts",
+      "destination": "/usr/local/lib/snes-console/song_banner.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "runtime/spotify_event.py": {
+      "component": "music",
+      "destination": "/usr/local/lib/snes-console/spotify_event.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "runtime/spotify_receiver.py": {
+      "component": "music",
+      "destination": "/usr/local/lib/snes-console/spotify_receiver.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "runtime/sync_ui_mode.py": {
+      "component": "scripts",
+      "destination": "/usr/local/lib/snes-console/sync_ui_mode.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
+      "redistributable": true
+    },
+    "runtime/system_settings.py": {
+      "component": "settings",
+      "destination": "/usr/local/sbin/snes-console-settings",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 493,
+      "redistributable": true
+    },
+    "runtime/track_art.py": {
+      "component": "scripts",
+      "destination": "/usr/local/lib/snes-console/track_art.py",
+      "license": "MIT",
+      "license_file": "licenses/ConsoleToolkit.txt",
+      "mode": 420,
       "redistributable": true
     }
-  }
+  },
+  "schema": 1
 }

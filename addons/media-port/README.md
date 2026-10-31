@@ -12,11 +12,11 @@ The existing game/update lock is inherited through the Ports launcher and held t
 
 Episode links use `#S<season>-E<episode>-<id>` and are checked against the selected show's published episode list. Only page-provided access parameters are used; login/CAPTCHA/denied playback is never bypassed. Movies and TV search run as two bounded requests and combine results with content-type labels. Only the selected episode is resolved, and its fragment remains part of the resume identity so progress does not carry over to another episode.
 
-On the original console, undo just TV support with `sudo -n python3 /home/snes/console-maintenance/media-port-tv/rollback.py` before attempting the older whole-port rollback below. A fresh recovery/clone uses the installer's restore journal and `--undo`, rather than donor machine development journals.
+On the original console, undo just TV support with `sudo -n python3 $HOME/console-maintenance/media-port-tv/rollback.py` before attempting the older whole-port rollback below. A fresh recovery/clone uses the installer's restore journal and `--undo`, rather than donor machine development journals.
 
 ## Maintenance and rollback
 
-On the console: `sudo -n python3 /home/snes/console-maintenance/media-port/rollback.py` restores the prior Settings-based player, source files and Ports metadata using the deployment journals. It does not remove private poster caches or stream preferences. Do not roll back while a movie/game/update is running. If later edits touched managed files, strict journal validation stops rather than discarding them.
+On the console: `sudo -n python3 $HOME/console-maintenance/media-port/rollback.py` restores the prior Settings-based player, source files and Ports metadata using the deployment journals. It does not remove private poster caches or stream preferences. Do not roll back while a movie/game/update is running. If later edits touched managed files, strict journal validation stops rather than discarding them.
 
 Recovery installation applies this additive addon after the older media-player addon. It merges the LookMovie game-list entry without removing Kodi, Liam's Loot or other ports; clone installs use the target user's home. Recovery's usual `--undo JOURNAL --apply` restores the pre-installation state. No new packages or services are required beyond the existing OMXPlayer, dbus-send, requests and SDL2 prerequisites.
 

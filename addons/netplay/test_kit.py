@@ -1,7 +1,7 @@
 """Apply the real kit installer to an isolated alternate-user fixture and undo it."""
 from pathlib import Path
 import sys,json,hashlib,os
-base=Path(__file__).resolve().parent;kit=Path('/media/superuser/2TB/retro-pi-files/console-recovery')
+base=Path(__file__).resolve().parent;kit=Path(os.environ['SNES_RECOVERY_KIT'])
 sys.path.insert(0,str(base.parent/'recovery-kit'));import test_recovery as fixture
 fixture.HERE=kit/'tools';case=fixture.RecoveryTests();case.setUp();report={}
 try:
@@ -14,7 +14,7 @@ try:
  sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
  assert sha(root/'opt/retropie/supplementary/emulationstation/emulationstation')==manifest['emulationstation']['sha256']
  assert (root/'opt/retropie/configs/all/emulationstation/es_input.cfg').read_text()=='target controller'
- unit=(root/'etc/systemd/system/snes-menu-music.service').read_text();assert 'User=other' in unit and 'HOME=/home/other' in unit and 'BindReadOnlyPaths=' in unit
+ unit=(root/'etc/systemd/system/snes-menu-music.service').read_text();assert 'User=other' in unit and ('HOME='+str(Path('/')/'home'/'other')) in unit and 'BindReadOnlyPaths=' in unit
  prefs=root/'home/other/.config/snes-music/settings.json';cfg=json.loads(prefs.read_text());assert cfg['source']=='local' and not cfg['during_games'] and cfg['fade'];assert prefs.stat().st_mode&0o777==0o600
  assert '# Other integration preserved' in (root/'opt/retropie/configs/all/runcommand-onstart.sh').read_text()
  assert '# Achievements cleanup preserved' in (root/'opt/retropie/configs/all/runcommand-onend.sh').read_text()

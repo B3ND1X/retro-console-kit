@@ -1,0 +1,94 @@
+--- a/tools/restore.py
++++ b/tools/restore.py
+@@ -24,7 +24,7 @@
+  if a.undo:
+   assert a.apply,'Undo requires --apply'
+   if not fixture:
+-   process_guard();stop_frontend();subprocess.run(['systemctl','stop','snes-menu-music.service'],check=False)
++   process_guard();stop_frontend();subprocess.run(['systemctl','stop','snes-casting.service','snes-casting.socket','snes-menu-music.service'],check=False)
+   rollback(a.undo,root)
+   if not fixture:restore_services(a.undo);subprocess.run(['systemctl','restart','getty@tty1.service'],check=True)
+   return
+@@ -96,6 +96,7 @@
+   prefixes.append('etc/emulationstation')
+   prefixes.extend(['usr/local/lib/snes-updater','etc/snes-updater'])
+   exact.extend(['usr/local/share/snes-console/VERSION','var/lib/snes-updater/installed.json','usr/local/sbin/snes-software-update','etc/sudoers.d/snes-software-update','etc/tmpfiles.d/snes-updater.conf','etc/systemd/system/getty@tty1.service.d/snes-update-recovery.conf']+['etc/systemd/system/'+x for x in ['snes-software-update.service','snes-software-check.service','snes-software-check.timer','snes-software-recovery.service','multi-user.target.wants/snes-software-recovery.service','timers.target.wants/snes-software-check.timer']])
++  exact.extend(['etc/systemd/system/snes-casting.service','etc/systemd/system/snes-casting.socket','etc/systemd/system/multi-user.target.wants/snes-casting.service','etc/systemd/system/sockets.target.wants/snes-casting.socket'])
+   assert rel in exact or any(rel==x or rel.startswith(x+'/') for x in prefixes),'Resolved write leaves managed installation paths: '+rel
+  def remember(path):
+   ensure_write_scope(path)
+@@ -185,14 +186,14 @@
+  frontend=[]
+  if not fixture:
+   states={}
+-  for unit in ['snes-shutdown-splash.service','asplashscreen.service','snes-wifi-awake.service','snes-fan.service','snes-buttons.service','snes-menu-music.service','ssh.service','smbd.service','snes-save-backups.timer','snes-save-backups.service','snes-save-backups-recover.service']:
++  for unit in ['snes-casting.socket','snes-casting.service','snes-shutdown-splash.service','asplashscreen.service','snes-wifi-awake.service','snes-fan.service','snes-buttons.service','snes-menu-music.service','ssh.service','smbd.service','snes-save-backups.timer','snes-save-backups.service','snes-save-backups-recover.service']:
+    states[unit]={key:subprocess.run(['systemctl',key,unit],stdout=subprocess.PIPE).stdout.decode().strip() for key in ['is-enabled','is-active']}
+   (rollbackdir/'services.json').write_text(json.dumps(states))
+   for unit in states:
+-   if unit!='snes-save-backups.service':remember(rooted('/etc/systemd/system/'+('sysinit.target.wants/' if unit=='asplashscreen.service' else ('timers.target.wants/' if unit.endswith('.timer') else 'multi-user.target.wants/'))+unit))
++   if unit!='snes-save-backups.service':remember(rooted('/etc/systemd/system/'+('sysinit.target.wants/' if unit=='asplashscreen.service' else ('sockets.target.wants/' if unit.endswith('.socket') else 'sockets.target.wants/' if unit.endswith('.socket') else 'timers.target.wants/' if unit.endswith('.timer') else 'multi-user.target.wants/'))+unit))
+   subprocess.run(['systemctl','stop','snes-save-backups.timer','snes-save-backups.service','snes-save-backups-recover.service'],check=False,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+   stop_frontend()
+-  subprocess.run(['systemctl','stop','snes-menu-music.service'],check=False,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
++  subprocess.run(['systemctl','stop','snes-casting.service','snes-casting.socket','snes-menu-music.service'],check=False,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+  try:
+   if a.mode=='recover' and not a.keep_extra_config:
+    configroot=rooted('/opt/retropie/configs')
+@@ -448,6 +449,33 @@
+   state['managed']['runtime/music_daemon.py']=digest(portaddon/'music_daemon.py')
+   write(statepath,(json.dumps(state,sort_keys=True)+'\n').encode(),0o600)
+   # End Ports media browser.
++  # Optional unified casting: code/runtime assets only, never pairing identities or preferences.
++  castaddon=Path(__file__).resolve().parent.parent/'addons/casting'
++  assert digest(castaddon/'manifest.json')=='23c477a99069602329e7ed3a3fc9218d5606c2598bbd0c413e24286dcdc39c18','Casting addon manifest mismatch'
++  castfiles=json.loads((castaddon/'manifest.json').read_text())
++  for name,h in castfiles.items():
++   p=castaddon/safe_name(name);assert p.is_file() and not p.is_symlink() and digest(p)==h,'Casting addon checksum mismatch'
++  for name in castfiles:
++   if name.startswith('app/'):write(rooted('/usr/local/lib/snes-console/casting/'+name[4:]),castaddon/name,0o644)
++  for name in ['media.py','music_daemon.py']:write(rooted('/usr/local/lib/snes-console/'+name),castaddon/name,0o644)
++  write(rooted('/opt/retropie/supplementary/emulationstation/emulationstation'),castaddon/'emulationstation',0o755)
++  for name in ['GuiConsoleCasting.inc','GuiConsoleSystemSettings.cpp']:write(rooted(home+'/console-maintenance/experience-upgrade/source/es-app/src/guis/'+name),castaddon/name,0o644,(uid,gid))
++  for name in castfiles:
++   if not name.startswith('app/') and name!='emulationstation':write(rooted(home+'/console-maintenance/casting/'+name),castaddon/name,0o644,(uid,gid))
++  for name in ['snes-casting.service','snes-casting.socket']:
++   data=(castaddon/name).read_text().replace('CONSOLE_USER',user).replace('CONSOLE_HOME',home).encode();write(rooted('/etc/systemd/system/'+name),data,0o644)
++  for parent,name in [('multi-user.target.wants','snes-casting.service'),('sockets.target.wants','snes-casting.socket')]:write(rooted('/etc/systemd/system/'+parent+'/'+name),None,link='/etc/systemd/system/'+name)
++  catpath=rooted('/etc/snes-updater/catalogue.json');cat=json.loads(catpath.read_text());statepath=rooted('/var/lib/snes-updater/installed.json');state=json.loads(statepath.read_text())
++  state['managed']['frontend/emulationstation']=digest(castaddon/'emulationstation')
++  for name in castfiles:
++   if not name.startswith('app/'):continue
++   relative=name[4:];alias='casting/'+relative;lic='MIT';notice='licenses/ConsoleToolkit.txt'
++   if relative.startswith('vendor/'):notice='casting/vendor/LICENSE.txt'
++   if relative.endswith(('.tar.gz','THIRD_PARTY_LICENSES.txt')):lic='GPL-3.0-or-later AND LGPL-2.1-or-later AND BSD-3-Clause AND MIT';notice='casting/THIRD_PARTY_LICENSES.txt'
++   cat['files'][alias]=dict(destination='/usr/local/lib/snes-console/casting/'+relative,mode=0o644,license=lic,license_file=notice,redistributable=not relative.endswith('.tar.gz'),component='casting');state['managed'][alias]=digest(castaddon/name)
++  for name in ['media.py','music_daemon.py']:state['managed']['runtime/'+name]=digest(castaddon/name)
++  write(catpath,(json.dumps(cat,sort_keys=True)+'\n').encode(),0o600);write(statepath,(json.dumps(state,sort_keys=True)+'\n').encode(),0o600)
++  # End unified casting.
+   # BEGIN animated SNES boot (only the explicit matching boot profile).
+   if a.boot_profile:
+    bootaddon=Path(__file__).resolve().parent.parent/'addons/boot-splash'
+@@ -529,6 +557,8 @@
+    if a.mode=='recover' or a.gpio:subprocess.run(['systemctl','enable','--now','snes-fan.service'],check=True)
+    if rooted('/etc/systemd/system/snes-save-backups-recover.service').exists():subprocess.run(['systemctl','enable','--now','snes-save-backups-recover.service'],check=True)
+    if rooted('/etc/systemd/system/snes-save-backups.timer').exists():subprocess.run(['systemctl','disable','--now','snes-save-backups.timer'],check=True)
++   subprocess.run(['systemctl','enable','--now','snes-casting.socket','snes-casting.service'],check=True)
++   subprocess.run(['systemctl','enable','--now','snes-casting.socket','snes-casting.service'],check=True)
+    subprocess.run(['systemctl','restart','getty@tty1.service'],check=True);subprocess.run(['systemctl','start','snes-menu-music.service'],check=True)
+    deadline=time.monotonic()+60;frontend_ready=False
+    while time.monotonic()<deadline:
+--- a/tools/remote_snapshot.py
++++ b/tools/remote_snapshot.py
+@@ -32,6 +32,11 @@
+  if n==loot+'/catalogue.sqlite3' or n.startswith(loot+'/') and not any(n==loot+'/'+x or n.startswith(loot+'/'+x+'/') for x in ['media','metadata-settings.json','controller.json','installed.jsonl']):return None
+  if action=='software' and (n=='opt/retropie/configs' or n.startswith('opt/retropie/configs/')):return None
+  if action=='configuration' and (n=='opt/retropie/configs/all/emulationstation/downloaded_images' or n.startswith('opt/retropie/configs/all/emulationstation/downloaded_images/')):return None
++ if n.startswith(str(home/'.config/snes-casting').lstrip('/')) or n.startswith(str(home/'.local/share/snes-casting').lstrip('/')):return None
++ if '/console-maintenance/casting/' in n:
++  # Casting sources and checked application payloads are explicitly curated in addons/casting.
++  # Development probes, private stream metadata and runtime/build caches never enter snapshots.
++  return None
+  if action=='maintenance':
+   if '/console-maintenance/media-port-tv/' in n:
+    if any(n.endswith('/'+x) or '/'+x+'/' in n for x in ['ui-test','live-test-state']):return None

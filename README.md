@@ -10,7 +10,7 @@ Start -> Settings -> Software Updates. Check, review notes and size, then confir
 
 ## Developer use
 
-See [architecture](docs/ARCHITECTURE.md) and [release workflow](docs/RELEASES.md). VERSION is authoritative. Keys and installation destinations are administrator-owned; release payloads cannot change them. Exact file allowlists and secret scans protect releases. PUBLISH-ALLOWLIST.json records the reviewed public-source file hashes.
+See [architecture](docs/ARCHITECTURE.md) and [release workflow](docs/RELEASES.md). VERSION is authoritative. Keys and installation destinations are administrator-owned; release payloads cannot change them. Exact file allowlists and secret scans protect releases. PUBLISH-ALLOWLIST.json records the reviewed public-source file hashes. Run `python3 developer/audit_source.py` before committing; unexpected files, symlinks, changed hashes and detected secrets fail closed.
 
 Run the isolated tests:
 
@@ -24,7 +24,34 @@ Version 1.0.1 is a conservative OTA verification release: its frontend is byte-i
 
 The live GitHub upgrade passed; see [verification results](docs/VERIFICATION.md).
 
-## Current media and casting source
+## Casting and media source (unreleased)
 
-The October 25 source update adds LookMovie movies/TV fixes, YouTube casting, AirPlay coordination, media player code and regression tests under `addons/`. Frontend integration includes are also provided at repository root. See [source sync and validation](docs/SOURCE-SYNC-2026-10-25.md) for coverage and runtime prerequisites. These source changes are newer than the v1.0.1 binary release. A source update to main does not install an OTA upgrade.
+The reviewed source now includes the casting coordinator, YouTube DIAL/Lounge,
+PIN-authenticated LAN media, optional AirPlay audio/mirroring, native frontend
+menus and the existing media/music integration. See [casting](docs/CASTING.md),
+[validation and limitations](docs/CASTING-REPORT.md), and [feature inventory](FEATURES.md).
 
+The simple casting menu has three On/Off switches. AirPlay audio keeps the frontend
+visible; screen mirroring returns cleanly to it. Direct Safari/app AirPlay video
+handoff is unsupported. YouTube is not certified Google Cast.
+
+Run casting tests separately from updater tests because each has its own policy module:
+
+```sh
+python3 -m unittest discover -s addons/casting/tests -v
+```
+
+This is a source update, not a new signed OTA release. VERSION remains the last
+published version. Runtime archives, precompiled frontend, personal recovery data,
+artwork and accounts are intentionally absent. The three runtime archive entries
+remain blocked from public releases pending corresponding-source and redistribution
+review. Do not build a release by archiving this checkout or the private kit.
+
+The frontend files integrate into the existing customized baseline; they are not
+a replacement upstream frontend. Python application code is covered by the root
+MIT license, frontend changes retain upstream GPL terms, and bundled protocol
+source retains its MIT notices. The RPiPlay patch retains GPL-3.0-or-later terms.
+The recovery integration patch is for the private baseline described in the docs;
+this public checkout alone cannot reproduce its private assets or ROM library.
+
+Earlier source-sync coverage is recorded in [the October 25 source report](docs/SOURCE-SYNC-2026-10-25.md).

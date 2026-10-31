@@ -1,0 +1,39 @@
+{
+  "ytdlpcast": "1b1e874596828ed27b7b7adc16cac7c36c7ba723",
+  "rpiplay": "64d0341ed3bef098c940c9ed0675948870a271f9",
+  "uxplay": "82ad05ce34ec862851fa6ab1240f50f58fb7fa5a",
+  "node_patch": {
+    "original_sha256": "407b390f1667066e55cb36c8622e79d6d488aed417d072487bfbe92f47829d6b",
+    "installed_sha256": "0d1174243bca1260c0631873cd513625d803aa9cc69e6720cbcb95c31684e6b2",
+    "change": "PT_INTERP points to existing private compatibility loader; no system files changed"
+  },
+  "packages": {
+    "libavahi-compat-libdnssd-dev_0.7-4+deb10u1_armhf.deb": {
+      "url": "https://archive.debian.org/debian/pool/main/a/avahi/libavahi-compat-libdnssd-dev_0.7-4+deb10u1_armhf.deb",
+      "sha256": "48bf90074e5bc3e0e133f2ed7786b475ab83b7d1ccf02605014caf02b6be3dd7"
+    },
+    "libavahi-compat-libdnssd1_0.7-4+deb10u1_armhf.deb": {
+      "url": "https://archive.debian.org/debian/pool/main/a/avahi/libavahi-compat-libdnssd1_0.7-4+deb10u1_armhf.deb",
+      "sha256": "1f1e7beb4ba54dc34e1956bd8612174b63f2dc67bd94ef7e36ef4c2c03e70687"
+    },
+    "libplist-dev_2.0.1~git20190104.3f96731-1_armhf.deb": {
+      "url": "https://archive.debian.org/debian/pool/main/libp/libplist/libplist-dev_2.0.1~git20190104.3f96731-1_armhf.deb",
+      "sha256": "ac882149efcd874b25bd19c3cb395b63bba38028a4499cfa6c40c4cb396506db"
+    },
+    "libplist3_2.0.1~git20190104.3f96731-1_armhf.deb": {
+      "url": "https://archive.debian.org/debian/pool/main/libp/libplist/libplist3_2.0.1~git20190104.3f96731-1_armhf.deb",
+      "sha256": "eaea4ef0e1ad74631200e7249f9f39b82e39a069e46312861e25b137fcbc8b9d"
+    },
+    "shairport-sync_3.2.2-1_armhf.deb": {
+      "url": "https://archive.debian.org/debian/pool/main/s/shairport-sync/shairport-sync_3.2.2-1_armhf.deb",
+      "sha256": "b7a0fc6547994f91dc336f320f44efefd5a2e59c7f42ac185f8e9abd1da90aa2"
+    }
+  },
+  "runtime_versions": {
+    "ffmpeg": "4.1.9",
+    "node": "22.23.4",
+    "rpiplay": "1.2",
+    "shairport": "3.2.2",
+    "yt_dlp": "2026.10.21"
+  }
+}

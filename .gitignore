@@ -6,3 +6,14 @@ __pycache__/
 release-assets*/
 build/
 staging/
+
+# Private runtimes and media never belong in this public source checkout.
+addons/casting/app/payload/
+addons/casting/runtime/
+addons/casting/research/
+addons/casting/private/
+addons/casting/debs/
+*.deb
+*.tar.gz
+*.zip
+*.mp4
