@@ -55,3 +55,5 @@ The recovery integration patch is for the private baseline described in the docs
 this public checkout alone cannot reproduce its private assets or ROM library.
 
 Earlier source-sync coverage is recorded in [the October 25 source report](docs/SOURCE-SYNC-2026-10-25.md).
+
+Bluetooth Controller Manager now displays advertised controller names, Bluetooth addresses and optional controller type/signal/device identifiers. See [Bluetooth controller identifiers](docs/BLUETOOTH-CONTROLLERS.md). Identifier lookup changes no mappings or OS packages. Newly paired unmapped controllers now receive a protected setup prompt; already mapped controllers are preserved.

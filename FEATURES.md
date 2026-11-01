@@ -249,3 +249,5 @@ authenticated LAN API passed real generated 720p playback, pause/resume/seek, qu
 and stop tests. Full-library game/Spotify regressions are; receiver startup is not a playback test. Runtime archives are
 in the private recovery kit but blocked from public OTA release pending complete
 corresponding-source/licensing review. See CASTING.md, CASTING-REPORT.md and addons/casting/BUILD.md.
+
+Bluetooth Controller Manager now displays advertised controller names, Bluetooth addresses and optional controller type/signal/device identifiers. See [Bluetooth controller identifiers](docs/BLUETOOTH-CONTROLLERS.md). Identifier lookup changes no mappings or OS packages. Newly paired unmapped controllers now receive a protected setup prompt; already mapped controllers are preserved.

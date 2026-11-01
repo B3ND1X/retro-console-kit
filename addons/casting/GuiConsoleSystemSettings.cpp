@@ -363,7 +363,8 @@ class ConsoleSettings:public GuiComponent {
   if(page.find("music")==0){musicPopulate(result);return;}
   if(page.find("saves")==0){savePopulate(result);return;}
   if(page=="wifi-join"||page=="bluetooth-pair"||page=="audio-select"||page=="audio-store"||page=="bezel-toggle"){
-   std::string message;for(auto& r:rows(result.second))if(r.size()>1){if(r[0]=="MIXER"&&result.first){Settings::getInstance()->setString("AudioCard","default");Settings::getInstance()->setString("AudioDevice",r[1]);Settings::getInstance()->saveFile();}else message+=r[1]+"\n";}
+   if(page=="bluetooth-pair"&&result.first){for(auto&r:rows(result.second))if(r.size()>1&&r[0]=="MAPPING_DEVICE"){bluetoothSetupName=r[1];bluetoothSetupWait=5000;}}
+   std::string message;for(auto& r:rows(result.second))if(r.size()>1){if(r[0]=="MIXER"&&result.first){Settings::getInstance()->setString("AudioCard","default");Settings::getInstance()->setString("AudioDevice",r[1]);Settings::getInstance()->saveFile();}else if(r[0]!="MAPPING_DEVICE")message+=r[1]+"\n";}
    std::string next=page=="wifi-join"?"network":page=="bluetooth-pair"?"bluetooth":page=="bezel-toggle"?"video":"audio";
    reset("SETTINGS");note(message.empty()?(result.first?"Setting saved.":"The operation could not be completed."):message);row("CONTINUE","",[this,next]{request(next);});done();return;
   }
@@ -386,6 +387,7 @@ class ConsoleSettings:public GuiComponent {
   }
   done();
  }
+ std::string bluetoothSetupName;int bluetoothSetupWait=0;
  bool fromControllerManager=false,fromMainDeveloperTools=false;
  void back(){if(fromMainDeveloperTools&&(page=="video"||page=="info")){delete this;return;}if(fromControllerManager&&page=="bluetooth"){delete this;return;}if(page=="root"){delete this;return;}request(page.find("bluetooth-")==0?"bluetooth":page.find("music-")==0?"music":page=="wifi-scan"?"network":page=="saves-inspect"?"saves-versions":page.find("saves-")==0?"saves":"root");}
 public:
@@ -397,6 +399,12 @@ public:
  float musicVolume()const{return musicVolumeSlider?musicVolumeSlider->getValue():-1;}
  void update(int dt) override{
   GuiComponent::update(dt);
+  if(bluetoothSetupWait>0&&mWindow->peekGui()==this){
+   bluetoothSetupWait-=dt;int candidate=-1,matches=0;
+   for(int n=0;n<SDL_NumJoysticks();n++){int id=SDL_JoystickGetDeviceInstanceID(n);auto c=InputManager::getInstance()->getInputConfigByDevice(id);if(c&&c->getDeviceName()==bluetoothSetupName){candidate=id;matches++;}}
+   if(matches==1){auto c=InputManager::getInstance()->getInputConfigByDevice(candidate);bluetoothSetupWait=0;if(c&&!c->isConfigured())mWindow->pushGui(new ConsoleBluetoothSetupPrompt(mWindow,candidate,bluetoothSetupName));}
+   else if(bluetoothSetupWait<=0){mWindow->pushGui(new GuiMsgBox(mWindow,"Bluetooth paired, but a unique gamepad input is not ready. Wake the controller, then use Controller Manager > Connected Controllers to test or configure it. Existing mappings are unchanged."));}
+  }
   if(change){change=false;page=pending;loading=false;if(page=="root")root();else if(page=="video")video();else{reset("SETTINGS");note(page=="wifi-join"?"Connecting to Wi-Fi... Previous settings will be restored if it fails.":page=="bluetooth-scan"?"Scanning for controllers... Put the controller in pairing mode.":page=="bluetooth-pair"?"Pairing controller...":"Loading...");position();if(page.find("saves")==0){
     std::string op=page=="saves"?"status":page.substr(6);std::vector<std::string> args={"progress",op};
     if(op=="inspect"||op=="restore")args.push_back(version);

@@ -41,6 +41,23 @@ public:
   GuiInputConfig::update(dt);
  }
 };
+// Post-pair setup uses the same backup/trial safeguards as manual setup.
+void beginBluetoothControllerSetup(Window*w,int id){
+ auto c=SDL_JoystickFromInstanceID(id)?InputManager::getInstance()->getInputConfigByDevice(id):nullptr;
+ if(!c||c->isConfigured())return;
+ auto result=controllerCall("begin");if(!result.first){w->pushGui(new GuiMsgBox(w,result.second));return;}
+ w->pushGui(new ConsoleSafeControllerWizard(w,c,std::make_shared<bool>(false)));
+}
+class ConsoleBluetoothSetupPrompt:public GuiMsgBox{
+ int device;
+public:
+ ConsoleBluetoothSetupPrompt(Window*w,int id,const std::string& name):GuiMsgBox(w,"Bluetooth connected: "+name+"\nThis controller has no button mapping.\nPress any button on it to set up, or choose SET UP with your existing controller. LATER keeps all mappings unchanged.","LATER",nullptr,"SET UP",[w,id]{beginBluetoothControllerSetup(w,id);}),device(id){}
+ bool input(InputConfig*c,Input i)override{
+  if(c&&c->getDeviceId()==device&&!c->isConfigured()&&i.type==TYPE_BUTTON&&i.value){auto w=mWindow;int id=device;delete this;beginBluetoothControllerSetup(w,id);return true;}
+  return GuiMsgBox::input(c,i);
+ }
+};
+
 class ConsoleControllerTest:public GuiComponent{
  MenuComponent menu;std::shared_ptr<TextComponent> display;std::vector<std::string> events;int device,heldTime=0,pollTime=0;bool held=false;Input button;
 public:
