@@ -57,3 +57,5 @@ this public checkout alone cannot reproduce its private assets or ROM library.
 Earlier source-sync coverage is recorded in [the October 25 source report](docs/SOURCE-SYNC-2026-10-25.md).
 
 Bluetooth Controller Manager now displays advertised controller names, Bluetooth addresses and optional controller type/signal/device identifiers. See [Bluetooth controller identifiers](docs/BLUETOOTH-CONTROLLERS.md). Identifier lookup changes no mappings or OS packages. Newly paired unmapped controllers now receive a protected setup prompt; already mapped controllers are preserved.
+
+Xbox Bluetooth LE identity-exchange repair is verified on the existing Buster console: local identity generation, clean pairing and working raw input, confirmed by the owner. Recovery provides a setting-preserving Privacy migration; the CLI helper waits for discovery and deliberately registers its pairing agent. No driver or OS upgrade and no published pairing keys. See docs/BLUETOOTH-CONTROLLERS.md.

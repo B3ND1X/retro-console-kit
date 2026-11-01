@@ -171,7 +171,15 @@ def bt_pair(data):
  if not paired:
   p=subprocess.Popen(['/usr/bin/bluetoothctl'],stdin=subprocess.PIPE,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,text=True)
   try:
-   p.stdin.write('power on\nagent NoInputNoOutput\ndefault-agent\nscan on\npair '+address+'\n');p.stdin.flush();deadline=time.monotonic()+30
+   # bluetoothctl auto-registers an agent. Replace it deliberately and let
+   # discovery create the device before asking BlueZ to pair it.
+   p.stdin.write('power on\nagent off\nagent NoInputNoOutput\ndefault-agent\nscan on\n');p.stdin.flush()
+   discovery=time.monotonic()+8
+   while time.monotonic()<discovery:
+    current=bt(['info',address],2)
+    if re.search(r'^Device '+re.escape(address)+r'\s+\(',current,re.M|re.I):break
+    time.sleep(.25)
+   p.stdin.write('pair '+address+'\n');p.stdin.flush();deadline=time.monotonic()+30
    while time.monotonic()<deadline:
     if 'Paired: yes' in bt(['info',address]):paired=True;break
     time.sleep(1)

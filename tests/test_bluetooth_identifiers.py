@@ -33,4 +33,14 @@ class Tests(unittest.TestCase):
   self.assertNotIn('MAPPING_DEVICE',out.getvalue())
  def test_address_validation(self):
   with self.assertRaises(s.Error):s.bt_pair({'address':'invalid; command'})
+ def test_fresh_pair_waits_for_discovery_and_replaces_agent(self):
+  process=type('Process',(),{})();process.stdin=io.StringIO();process.wait=lambda timeout:0;process.poll=lambda:0
+  calls=[0]
+  def bt(cmd,timeout=8):
+   if cmd[0]!='info':return ''
+   calls[0]+=1
+   if calls[0]<3:return 'Device '+A+' not available'
+   return 'Device '+A+' (public)\n Name: Xbox Wireless Controller\n Paired: '+('yes' if ('pair '+A+'\n') in process.stdin.getvalue() else 'no')+'\n Connected: yes\n'
+  with patch.object(s,'bt',bt),patch.object(s.subprocess,'Popen',return_value=process),patch.object(s.time,'sleep'),contextlib.redirect_stdout(io.StringIO()):s.bt_pair({'address':A})
+  commands=process.stdin.getvalue();self.assertLess(commands.index('agent off'),commands.index('agent NoInputNoOutput'));self.assertLess(commands.index('scan on'),commands.index('pair '+A));self.assertGreaterEqual(calls[0],4)
 if __name__=='__main__':unittest.main()
